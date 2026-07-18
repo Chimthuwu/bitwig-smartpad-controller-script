@@ -3,6 +3,22 @@
 Bitwig Studio controller script for the **MIDIPLUS Smartpad**. 
 This script transforms the device into a true 8x8 Clip Launcher with accurate LED color feedback. 
 
+## 🎥 See it in Action
+
+<div align="center">
+
+**Inside Bitwig:**
+
+![Inside Bitwig](https://github.com/Chimthuwu/bitwig-smartpad-controller-script/blob/main/ClipLaunch2.gif?raw=true)
+
+**Smartpad Response:**
+
+![Smartpad Response](https://github.com/Chimthuwu/bitwig-smartpad-controller-script/blob/main/SMARTPAD.gif?raw=true)
+
+</div>
+
+---
+
 ## 🚀 Features
 
 *   **True 8x8 Clip Launcher:** Launch clips and scenes effortlessly across the main grid. Pad LEDs perfectly sync with your active playing, queued, and recording states.
@@ -15,7 +31,7 @@ This script transforms the device into a true 8x8 Clip Launcher with accurate LE
 
 ## 🎨 Smartpad Hardware Color Zones
 
-Thanks to Bitwigs Console we were able to map the Smartpads internal LED velocity bands. 
+Thanks to Bitwig's Console we were able to map the Smartpad's internal LED velocity bands. 
 The script automatically translates your Bitwig clip colors into these 16-step velocity zones:
 
 | Velocity Range | Target Velocity | Hardware Color |
