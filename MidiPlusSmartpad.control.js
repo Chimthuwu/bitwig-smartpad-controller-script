@@ -21,21 +21,22 @@ host.defineController(
     "Midiplus",
     "Midiplus Smartpad (Master)",
     "4.0",
-    "a6c84c10-b962-11ee-b883-c8348e271c68",
+    "f8e1d2c3-a4b5-4c6d-7e8f-9a0b1c2d3e4f",
     "Developer"
 );
 
+// Define ports and hardware auto-discovery
 host.defineMidiPorts(1, 1);
 host.addDeviceNameBasedDiscoveryPair(["MIDIPLUS SMARTPAD"], ["MIDIPLUS SMARTPAD"]);
 host.addDeviceNameBasedDiscoveryPair(["Smartpad"], ["Smartpad"]);
 host.addDeviceNameBasedDiscoveryPair(["SmartPAD"], ["SmartPAD"]);
 
-const midiIn = host.getMidiInPort(0);
-const midiOut = host.getMidiOutPort(0);
-
 const NUM_TRACKS = 8;
 const NUM_SLOTS  = 8;
 
+// Declare variables in global scope, but initialize them safely inside init()
+let midiIn;
+let midiOut;
 let trackBank;
 let slotStates = [];
 let mode1Devices = [];
@@ -45,17 +46,21 @@ let mode1Remotes = [];
    INIT
    ---------------------------------------------------------------------
    CRITICAL API NOTE: Bitwig strictly requires that ALL objects 
-   (TrackBanks, CursorDevices, RemoteControls, Observers) are created 
-   inside this init() function. Creating them inside a MIDI callback 
-   will instantly crash the script.
+   (TrackBanks, CursorDevices, RemoteControls, Observers, and Ports) 
+   are created inside this init() function. Creating them inside a MIDI 
+   callback or the global scope will instantly crash the script.
    ===================================================================== */
 function init() {
     println("Midiplus Smartpad Controller v4.0 (Community Edition) Loaded!");
 
-    // 1. Create the main track bank (8 Tracks, 0 Sends, 8 Scenes)
+    // 1. Initialize MIDI ports
+    midiIn = host.getMidiInPort(0);
+    midiOut = host.getMidiOutPort(0);
+
+    // 2. Create the main track bank (8 Tracks, 0 Sends, 8 Scenes)
     trackBank = host.createTrackBank(NUM_TRACKS, 0, NUM_SLOTS);
 
-    // 2. Pre-allocate Cursor Devices and Remote Controls for Mode 1
+    // 3. Pre-allocate Cursor Devices and Remote Controls for Mode 1
     for (let t = 0; t < NUM_TRACKS; t++) {
         let track = trackBank.getTrack(t);
         let device = track.createCursorDevice();
@@ -64,7 +69,7 @@ function init() {
         mode1Remotes[t] = remotes;
     }
 
-    // 3. Build the State Engine and attach Observers
+    // 4. Build the State Engine and attach Observers
     for (let t = 0; t < NUM_TRACKS; t++) {
         slotStates[t] = [];
         let track = trackBank.getTrack(t);
@@ -219,9 +224,7 @@ function matchColorToSmartpadVelocity(r, g, b) {
 
     // 2. Catch Whites and Greys (Low Saturation)
     let saturation = max === 0 ? 0 : delta / max;
-    if (saturation < 0.25) {
-        return 8; // White (Velocity Band: 1-16)
-    }
+    if (saturation < 0.25) return 8; // White (Velocity Band: 1-16)
 
     // 3. Calculate Hue (0 to 360 degrees)
     let hue = 0;
@@ -277,6 +280,16 @@ function refreshSlot(t, s) {
     } else {
         midiOut.sendMidi(0x80, note, 0);        // Proper Note Off (Extinguishes LED)
     }
+}
+
+/* =====================================================================
+   FLUSH
+   ---------------------------------------------------------------------
+   Required by the Bitwig API. This is called at the end of every 
+   event loop to send out MIDI updates.
+   ===================================================================== */
+function flush() {
+    // Handled by refreshSlot() 
 }
 
 /* =====================================================================
